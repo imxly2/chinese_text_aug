@@ -25,26 +25,29 @@ def segment_text(text, maxlen, seps='\n', strips=None):
         return [text]
 
 
-def _translate(sents, from_lan, to_lan):
+def _translate(sents, from_lan, to_lan, device):
     tokenizer.src_lang = from_lan
     inputs = tokenizer(sents, return_attention_mask=True, return_tensors='pt', padding=True)
+    if device.startswith('cuda'):
+        inputs = {k:v.to(device) for k, v in inputs.items()}
     generated_tokens = model.generate(**inputs, forced_bos_token_id=tokenizer.get_lang_id(to_lan))
     return tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
 
 
-def translate_and_back(sent):
+def translate_and_back(sent, device):
     sent = segment_text(sent, 30, '\m。；！.')
-    res1 = _translate(sent, 'zh', 'en')
-    return ''.join(_translate(res1, 'en', 'zh'))
+    res1 = _translate(sent, 'zh', 'en', device)
+    return ''.join(_translate(res1, 'en', 'zh', device))
 
 
-def back_translate(inp):
+def back_translate(inp, device='cpu'):
+    model.to(device)
     if isinstance(inp, str):
-        return translate_and_back(inp)
+        return translate_and_back(inp, device)
     else:
         res = []
         for sent in tqdm(inp):
-            res.append(translate_and_back(sent))
+            res.append(translate_and_back(sent, device))
     return res
 
 

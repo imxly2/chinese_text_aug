@@ -23,7 +23,7 @@ from tda import back_translate
 s1 = '我是需要增强的'
 s2 = ['我是需要增强的', '我是需要翻译的']
 r1 = back_translate(s1)
-r2 = back_translate(s2)
+r2 = back_translate(s2, device='cuda:0')
  ```
 ## 安装方法  
-pip install git+https://github.com/renmada/text-data-augmentation.git
+pip install git+https://github.com/imxly2/chinese_text_aug.git
